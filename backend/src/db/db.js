@@ -1,67 +1,15 @@
-const foodPartnerModel = require("../models/foodpartner.model")
-const userModel = require("../models/user.model")
-const jwt = require("jsonwebtoken");
+const mongoose = require('mongoose');
 
 
-async function authFoodPartnerMiddleware(req, res, next) {
 
-    const token = req.cookies.token;
-
-    if (!token) {
-        return res.status(401).json({
-            message: "Please login first"
+function connectDB() {
+    mongoose.connect(process.env.MONGODB_URI)
+        .then(() => {
+            console.log("MongoDB connected");
         })
-    }
-
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET)
-
-        const foodPartner = await foodPartnerModel.findById(decoded.id);
-
-        req.foodPartner = foodPartner
-
-        next()
-
-    } catch (err) {
-
-        return res.status(401).json({
-            message: "Invalid token"
+        .catch((err) => {
+            console.log("MongoDB connection error:", err);
         })
-
-    }
-
 }
 
-async function authUserMiddleware(req, res, next) {
-
-    const token = req.cookies.token;
-
-    if (!token) {
-        return res.status(401).json({
-            message: "Please login first"
-        })
-    }
-
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET)
-
-        const user = await userModel.findById(decoded.id);
-
-        req.user = user
-
-        next()
-
-    } catch (err) {
-
-        return res.status(401).json({
-            message: "Invalid token"
-        })
-
-    }
-
-}
-
-module.exports = {
-    authFoodPartnerMiddleware,
-    authUserMiddleware
-}
+module.exports = connectDB;
